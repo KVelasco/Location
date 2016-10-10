@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <group
+        android:id="@+id/primary_nav_drawer_group"
+        android:checkableBehavior="single">
+
+        <item
+            android:id="@+id/nav_item_current_location"
+            android:checked="true"
+            android:title="@string/nav_item_current_location" />
+
+        <item
+            android:id="@+id/nav_item_san_francisco"
+            android:checked="false"
+            android:title="@string/nav_item_san_francisco" />
+
+        <item
+            android:id="@+id/nav_item_new_york_city"
+            android:checked="false"
+            android:title="@string/nav_item_new_york_city" />
+
+    </group>
+
+
+</menu>
