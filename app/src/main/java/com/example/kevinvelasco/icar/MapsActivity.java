@@ -25,7 +25,10 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.PolylineOptions;
+import com.google.maps.android.PolyUtil;
 import com.tbruyelle.rxpermissions.RxPermissions;
 
 import java.io.IOException;
@@ -33,12 +36,16 @@ import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import retrofit.Callback;
+import retrofit.RetrofitError;
+import retrofit.client.Response;
 
 public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback,
         GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
 
     public static final String TAG = MapsActivity.class.getSimpleName();
     public static final String CURRENT_LOCATION = "Current Location";
+    public static final String MODE = "driving";
 
     GoogleMap mMap;
     GoogleApiClient googleApiClient;
@@ -165,6 +172,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 case R.id.nav_item_current_location:
                     requestLocationAndUpdateMaker();
                     break;
+                case R.id.nav_item_route_sf_to_nyc:
+                    drawRouteBetweenCittes("San Francisco","New York");
+                    break;
                 default:
                     //get string of city name
                     String cityName = item.getTitle().toString();
@@ -239,4 +249,43 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                             .show();
                 }, () -> Log.i(TAG, "OnComplete"));
     }
+
+
+    public void drawRouteBetweenCittes(String origin, String  dest){
+        iCarsApplication.getICarsService().getOverviewPolylone(origin, dest, MODE, new Callback<DrivingResponse>() {
+            @Override
+            public void success(DrivingResponse drivingResponse, Response response) {
+                List<LatLng> latLngs = PolyUtil.decode(drivingResponse.getRoutes().get(0).getPolyline().getPoints());
+
+                mMap.clear();
+                mMap.addPolyline(new PolylineOptions().geodesic(true)
+                        .add(latLngs.toArray(new LatLng[latLngs.size()])));
+
+                LatLngBounds.Builder builder = new LatLngBounds.Builder();
+
+                for (LatLng latLng : latLngs){
+                    builder.include(latLng);
+                }
+
+                mMap.moveCamera(CameraUpdateFactory.newLatLngBounds(builder.build(), 20));
+                mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(builder.build(), 20));
+
+                LatLng start = getLatLongFromCityName(origin);
+                LatLng end = getLatLongFromCityName(dest);
+
+                mMap.addMarker(new MarkerOptions().position(start).title(origin));
+                mMap.addMarker(new MarkerOptions().position(end).title(dest));
+            }
+
+            @Override
+            public void failure(RetrofitError error) {
+
+            }
+        });
+
+
+
+    }
+
+
 }

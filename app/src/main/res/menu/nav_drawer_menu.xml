@@ -19,6 +19,11 @@
             android:checked="false"
             android:title="@string/nav_item_new_york_city" />
 
+        <item
+            android:id="@+id/nav_item_route_sf_to_nyc"
+            android:checked="false"
+            android:title="@string/nav_route_title" />
+
     </group>
 
 
